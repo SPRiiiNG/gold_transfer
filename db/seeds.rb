@@ -5,3 +5,8 @@
 #
 #   movies = Movie.create([{ name: 'Star Wars' }, { name: 'Lord of the Rings' }])
 #   Character.create(name: 'Luke', movie: movies.first)
+
+currency = FactoryBot.create(:currency, code: 'th')
+asset_cash = FactoryBot.create(:asset, name: 'cash')
+asset_gold = FactoryBot.create(:asset, name: 'gold')
+user = FactoryBot.create(:user, region: currency, email: 'gold@example.com')
