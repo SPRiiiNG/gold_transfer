@@ -70,4 +70,54 @@ RSpec.describe 'Transactions API', type: :request do
       expect(cash_balance.amount.to_f).to eq(1000)
     end
   end
+
+  describe "#withdraw" do
+    it "should withdraw successfully" do
+      post api_transactions_withdraw_path,
+      headers: {
+        "X-USER-EMAIL" => user.email,
+        "X-USER-TOKEN" => token
+      },
+      params: {
+        amount: 999
+      }
+      data = JSON.parse(response.body)
+      expect(response.status).to eq(200)
+      expect(data['result']).to eq('ok')
+      cash_balance = user.balances.where(asset_id: asset_cash.id).first
+      expect(cash_balance.amount.to_f).to eq(1)
+    end
+
+    it "should withdraw failured" do
+      post api_transactions_withdraw_path,
+      headers: {
+        "X-USER-EMAIL" => user.email,
+        "X-USER-TOKEN" => token
+      },
+      params: {
+        amount: 'eiei'
+      }
+      data = JSON.parse(response.body)
+      expect(response.status).to eq(400)
+      expect(data['message']).to be_present
+      cash_balance = user.balances.where(asset_id: asset_cash.id).first
+      expect(cash_balance.amount.to_f).to eq(1000)
+    end
+
+    it "should withdraw failured if withdraw more than cash balance" do
+      post api_transactions_withdraw_path,
+      headers: {
+        "X-USER-EMAIL" => user.email,
+        "X-USER-TOKEN" => token
+      },
+      params: {
+        amount: 2000
+      }
+      data = JSON.parse(response.body)
+      expect(response.status).to eq(400)
+      expect(data['message']).to be_present
+      cash_balance = user.balances.where(asset_id: asset_cash.id).first
+      expect(cash_balance.amount.to_f).to eq(1000)
+    end
+  end
 end

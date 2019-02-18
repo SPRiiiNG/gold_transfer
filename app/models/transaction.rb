@@ -121,14 +121,14 @@ class Transaction < ApplicationRecord
   def cash_enough
     cash_balance = asset_balance(self.user)
     transfer_buy = self.transaction_type == 'buy' ? transfer_buy(self.asset_type, income_amount)[:deduct] : income_amount
-    if transfer_buy > cash_balance.amount
+    if transfer_buy.to_f > cash_balance.amount
       errors.add("balance", "cash not enough, cash total: #{transfer_buy}, cash amount: #{cash_balance.amount}")
     end
   end
 
   def asset_enough
     asset_balance = asset_balance(self.user, self.asset_type)
-    if self.income_amount > asset_balance.amount
+    if self.income_amount.to_f > asset_balance.amount
       errors.add("balance", "#{self.asset_type} not enough, #{self.asset_type} total: #{self.income_amount}, #{self.asset_type} amount: #{asset_balance.amount}")
     end
   end
