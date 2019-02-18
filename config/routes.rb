@@ -6,6 +6,7 @@ Rails.application.routes.draw do
     get 'transactions', to: 'transactions#index'
     post 'transactions/top_up', to: 'transactions#top_up'
     post 'transactions/withdraw', to: 'transactions#withdraw'
+    post 'transactions/buy', to: 'transactions#buy'
 
     devise_for :users, controllers: {
       sessions: 'users/sessions'

@@ -72,15 +72,15 @@ class Transaction < ApplicationRecord
 
   def transfer_buy(asset_type, asset_amount)
     {
-      add: asset_amount,
-      deduct: asset_amount * 10
+      add: asset_amount.to_f,
+      deduct: asset_amount.to_f * 10
     }
   end
 
   def transfer_sell(asset_type, asset_amount)
     {
-      add: asset_amount * 10,
-      deduct: asset_amount
+      add: asset_amount.to_f * 10,
+      deduct: asset_amount.to_f
     }
   end
 

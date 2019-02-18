@@ -120,4 +120,57 @@ RSpec.describe 'Transactions API', type: :request do
       expect(cash_balance.amount.to_f).to eq(1000)
     end
   end
+
+  describe "#buy" do
+    it "should buy successfully" do
+      post api_transactions_buy_path,
+      headers: {
+        "X-USER-EMAIL" => user.email,
+        "X-USER-TOKEN" => token
+      },
+      params: {
+        amount: 20,
+        asset: 'gold'
+      }
+      data = JSON.parse(response.body)
+      expect(response.status).to eq(200)
+      expect(data['result']).to eq('ok')
+      cash_balance = user.balances.where(asset_id: asset_cash.id).first
+      expect(cash_balance.amount.to_f).to eq(800)
+    end
+
+    it "should buy failured" do
+      post api_transactions_buy_path,
+      headers: {
+        "X-USER-EMAIL" => user.email,
+        "X-USER-TOKEN" => token
+      },
+      params: {
+        amount: 'eiei',
+        asset: 'gold'
+      }
+      data = JSON.parse(response.body)
+      expect(response.status).to eq(400)
+      expect(data['message']).to be_present
+      cash_balance = user.balances.where(asset_id: asset_cash.id).first
+      expect(cash_balance.amount.to_f).to eq(1000)
+    end
+
+    it "should buy failured if buy more than cash balance" do
+      post api_transactions_buy_path,
+      headers: {
+        "X-USER-EMAIL" => user.email,
+        "X-USER-TOKEN" => token
+      },
+      params: {
+        amount: 150,
+        asset: 'gold'
+      }
+      data = JSON.parse(response.body)
+      expect(response.status).to eq(400)
+      expect(data['message']).to be_present
+      cash_balance = user.balances.where(asset_id: asset_cash.id).first
+      expect(cash_balance.amount.to_f).to eq(1000)
+    end
+  end
 end

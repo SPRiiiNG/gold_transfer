@@ -23,6 +23,15 @@ module Api
       end
     end
 
+    def buy
+      transaction = initial_transaction(asset_params[:amount], 'buy', asset_params[:asset])
+      if transaction.save
+        render json: { result: 'ok' }
+      else
+        render json: { message: transaction.errors.full_messages.join(',')}, status: 400
+      end
+    end
+
     private
     def initial_transaction(amount, type, asset)
       transaction = Transaction.new(
@@ -37,5 +46,8 @@ module Api
       params.permit(:amount)
     end
     
+    def asset_params
+      params.permit(:amount, :asset)
+    end
   end
 end
