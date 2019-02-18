@@ -6,7 +6,7 @@ class Transaction < ApplicationRecord
   belongs_to :user
   has_many :transaction_transfers
 
-  validates :type,
+  validates :transaction_type,
     presence: true,
     inclusion: { in: allowed_types }
 
@@ -18,15 +18,15 @@ class Transaction < ApplicationRecord
     numericality: { greater_than_or_equal_to: 0 }
 
   validate :asset_type_inclusion
-  validate :cash_enough, :if => Proc.new { |record| %w(buy withdraw).include?(record.type)}
-  validate :asset_enough, :if => Proc.new { |record| record.type == 'sell'}
+  validate :cash_enough, :if => Proc.new { |record| %w(buy withdraw).include?(record.transaction_type)}
+  validate :asset_enough, :if => Proc.new { |record| record.transaction_type == 'sell'}
   
 
   after_save :relate_to_balance
 
   def relate_to_balance
     cash_balance = asset_balance(self.user)
-    case self.type
+    case self.transaction_type
     when 'buy'
       transfer_buy = transfer_buy(self.asset_type, income_amount)
       asset_balance = asset_balance(self.user, self.asset_type)
@@ -107,7 +107,7 @@ class Transaction < ApplicationRecord
 
   def cash_enough
     cash_balance = asset_balance(self.user)
-    transfer_buy = self.type == 'buy' ? transfer_buy(self.asset_type, income_amount)[:deduct] : income_amount
+    transfer_buy = self.transaction_type == 'buy' ? transfer_buy(self.asset_type, income_amount)[:deduct] : income_amount
     if transfer_buy > cash_balance.amount
       errors.add("balance", "cash not enough, cash total: #{transfer_buy}, cash amount: #{cash_balance.amount}")
     end
