@@ -12,7 +12,8 @@ RSpec.describe 'Users API', type: :request do
         password: "123456789",
         password_confirmation: "123456789",
         first_name: "Test",
-        last_name: "Nakrub"
+        last_name: "Nakrub",
+        region: currency.code
       }
       expect(response.status).to eq(201)
     end
@@ -24,11 +25,27 @@ RSpec.describe 'Users API', type: :request do
         password: "123456789",
         password_confirmation: "123456789",
         first_name: "Test",
-        last_name: "Nakrub"
+        last_name: "Nakrub",
+        region: currency.code
       }
       data = JSON.parse(response.body)
       expect(response.status).to eq(200)
       expect(data['message']).to match(/Email has already been taken/)
+    end
+
+    it "should return status 200 and message incorrect region" do
+      post api_register_path,
+      params: {
+        email: "aa@example.com",
+        password: "123456789",
+        password_confirmation: "123456789",
+        first_name: "Test",
+        last_name: "Nakrub",
+        region: 'cn'
+      }
+      data = JSON.parse(response.body)
+      expect(response.status).to eq(200)
+      expect(data['message']).to match(/Region must exist/)
     end
   end
 end
