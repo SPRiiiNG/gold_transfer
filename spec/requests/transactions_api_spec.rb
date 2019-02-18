@@ -137,6 +137,8 @@ RSpec.describe 'Transactions API', type: :request do
       expect(data['result']).to eq('ok')
       cash_balance = user.balances.where(asset_id: asset_cash.id).first
       expect(cash_balance.amount.to_f).to eq(800)
+      gold_balance = user.balances.where(asset_id: asset_gold.id).first
+      expect(gold_balance.amount.to_f).to eq(20)
     end
 
     it "should buy failured" do
@@ -154,6 +156,8 @@ RSpec.describe 'Transactions API', type: :request do
       expect(data['message']).to be_present
       cash_balance = user.balances.where(asset_id: asset_cash.id).first
       expect(cash_balance.amount.to_f).to eq(1000)
+      gold_balance = user.balances.where(asset_id: asset_gold.id).first
+      expect(gold_balance.amount.to_f).to eq(0)
     end
 
     it "should buy failured if buy more than cash balance" do
@@ -171,6 +175,73 @@ RSpec.describe 'Transactions API', type: :request do
       expect(data['message']).to be_present
       cash_balance = user.balances.where(asset_id: asset_cash.id).first
       expect(cash_balance.amount.to_f).to eq(1000)
+      gold_balance = user.balances.where(asset_id: asset_gold.id).first
+      expect(gold_balance.amount.to_f).to eq(0)
+    end
+  end
+
+  describe "#sell" do
+    let(:transaction_buy) { FactoryBot.build(:transaction, income_amount: 50, transaction_type: 'buy', asset_type: 'gold', user_id: user.id) }
+
+    before do
+      transaction_buy.save
+    end
+
+    it "should sell successfully" do
+      post api_transactions_sell_path,
+      headers: {
+        "X-USER-EMAIL" => user.email,
+        "X-USER-TOKEN" => token
+      },
+      params: {
+        amount: 20,
+        asset: 'gold'
+      }
+      data = JSON.parse(response.body)
+      expect(response.status).to eq(200)
+      expect(data['result']).to eq('ok')
+      cash_balance = user.balances.where(asset_id: asset_cash.id).first
+      expect(cash_balance.amount.to_f).to eq(700)
+      gold_balance = user.balances.where(asset_id: asset_gold.id).first
+      expect(gold_balance.amount.to_f).to eq(30)
+    end
+
+    it "should sell failured" do
+      post api_transactions_sell_path,
+      headers: {
+        "X-USER-EMAIL" => user.email,
+        "X-USER-TOKEN" => token
+      },
+      params: {
+        amount: 'eiei',
+        asset: 'gold'
+      }
+      data = JSON.parse(response.body)
+      expect(response.status).to eq(400)
+      expect(data['message']).to be_present
+      cash_balance = user.balances.where(asset_id: asset_cash.id).first
+      expect(cash_balance.amount.to_f).to eq(500)
+      gold_balance = user.balances.where(asset_id: asset_gold.id).first
+      expect(gold_balance.amount.to_f).to eq(50)
+    end
+
+    it "should sell failured if sell more than gold balance" do
+      post api_transactions_sell_path,
+      headers: {
+        "X-USER-EMAIL" => user.email,
+        "X-USER-TOKEN" => token
+      },
+      params: {
+        amount: 60,
+        asset: 'gold'
+      }
+      data = JSON.parse(response.body)
+      expect(response.status).to eq(400)
+      expect(data['message']).to be_present
+      cash_balance = user.balances.where(asset_id: asset_cash.id).first
+      expect(cash_balance.amount.to_f).to eq(500)
+      gold_balance = user.balances.where(asset_id: asset_gold.id).first
+      expect(gold_balance.amount.to_f).to eq(50)
     end
   end
 end
