@@ -2,7 +2,8 @@ require 'rails_helper'
 
 RSpec.describe 'Users API', type: :request do
   describe "#create" do
-    let(:user)      { FactoryBot.create(:user) }
+    let(:currency) { FactoryBot.create(:currency) }
+    let(:user)      { FactoryBot.create(:user, region: currency) }
 
     it "should return status 201" do
       post api_register_path,

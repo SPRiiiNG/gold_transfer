@@ -2,7 +2,8 @@ require 'rails_helper'
 
 RSpec.describe 'Sessions API', type: :request do
   describe "#create" do
-    let(:user)      { FactoryBot.create(:user) }
+    let(:currency) { FactoryBot.create(:currency) }
+    let(:user)      { FactoryBot.create(:user, region: currency) }
 
     it "should return token and status 200" do
       post api_user_session_path,
