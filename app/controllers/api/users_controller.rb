@@ -1,6 +1,6 @@
 module Api 
   class UsersController < ApiController
-    skip_before_action :authenticate_user!, only: [:create], raise: false
+    skip_before_action :authenticate_api_user!, only: [:create], raise: false
     skip_before_action :verify_authenticity_token, only: [:create]
     before_action :get_region, only: [:create]
 
