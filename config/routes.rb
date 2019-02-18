@@ -8,6 +8,7 @@ Rails.application.routes.draw do
     post 'transactions/withdraw', to: 'transactions#withdraw'
     post 'transactions/buy', to: 'transactions#buy'
     post 'transactions/sell', to: 'transactions#sell'
+    get 'balance', to: 'balances#show'
 
     devise_for :users, controllers: {
       sessions: 'users/sessions'
