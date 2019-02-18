@@ -21,7 +21,7 @@ class Transaction < ApplicationRecord
   validate :cash_enough, :if => Proc.new { |record| %w(buy withdraw).include?(record.transaction_type)}
   validate :asset_enough, :if => Proc.new { |record| record.transaction_type == 'sell'}
   
-
+  before_validation :generate_name
   after_save :relate_to_balance
 
   def relate_to_balance
@@ -97,6 +97,19 @@ class Transaction < ApplicationRecord
     Asset.all.pluck(:name)
   end
 
+  def self.represent_all
+    # Transaction.select("id, name, asset_type as asset, transaction_type as type")
+    Transaction.includes(:transaction_transfers).all.map do |transaction|
+      {
+        "id" => transaction.id,
+        "name" => transaction.name,
+        "type" => transaction.transaction_type,
+        "asset" => transaction.asset_type,
+        "amount" => transaction.transaction_transfers_by(transaction.asset_type).first.amount
+      }
+    end
+  end
+
   private
   def asset_type_inclusion
     allowed_asset_types = Transaction.allowed_asset_types
@@ -127,5 +140,9 @@ class Transaction < ApplicationRecord
       transfer_type: transfer_type,
       amount: amount
     )
+  end
+
+  def generate_name
+    self.name = SecureRandom.base64(12)
   end
 end

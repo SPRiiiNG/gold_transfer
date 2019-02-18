@@ -5,6 +5,7 @@ Rails.application.routes.draw do
   namespace :api, :defaults => {:format => :json} do
 
     post 'register', to: 'users#create'
+    get 'transactions', to: 'transactions#index'
 
 
     devise_for :users, controllers: {
