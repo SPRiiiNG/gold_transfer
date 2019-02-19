@@ -16,7 +16,7 @@ class Transaction < ApplicationRecord
 
   validates :income_amount,
     presence: true,
-    numericality: { greater_than_or_equal_to: 0 }
+    numericality: { greater_than_or_equal_to: 0 }, if: Proc.new{ |obj| obj.new_record? }
 
   validate :asset_type_inclusion
   validate :cash_enough, :if => Proc.new { |record| %w(buy withdraw).include?(record.transaction_type)}
@@ -25,13 +25,15 @@ class Transaction < ApplicationRecord
   before_validation :generate_name
   after_create :create_transfers
 
+  scope :by_cash, ->  { Transaction.where(asset_type: 'cash') }
+
   aasm column: :status do
     state :pending, :initial => true
     state :completed
     state :rejected
 
     event :approve do
-      before do
+      after do
         self.relate_to_balance
       end
       transitions :from => :pending, :to => :completed

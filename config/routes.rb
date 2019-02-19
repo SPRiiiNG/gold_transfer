@@ -8,6 +8,13 @@ Rails.application.routes.draw do
   
   get 'welcome', to: "home#welcome"
 
+  resources :transactions do
+    member do
+      put :approve
+      put :reject
+    end
+  end
+
   namespace :api, :defaults => {:format => :json} do
     post 'register', to: 'users#create'
     get 'transactions', to: 'transactions#index'

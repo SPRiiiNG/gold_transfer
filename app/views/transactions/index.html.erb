@@ -1,0 +1,24 @@
+<div class="container">
+  <h2>Transactions</h2>
+
+  <ul class="nav nav-tabs">
+    <li class="active"><a data-toggle="tab" href="#pending">Pending</a></li>
+    <li><a data-toggle="tab" href="#completed">Completed</a></li>
+    <li><a data-toggle="tab" href="#rejected">Rejected</a></li>
+  </ul>
+
+  <div class="tab-content">
+    <div id="pending" class="tab-pane fade in active">
+      <h3>Pending</h3>
+      <%= render 'pending_table' %>
+    </div>
+    <div id="completed" class="tab-pane fade">
+      <h3>Completed</h3>
+      <%= render partial: 'other_table', locals: {transactions: @completed_transactions} %>
+    </div>
+    <div id="rejected" class="tab-pane fade">
+      <h3>Rejected</h3>
+      <%= render partial: 'other_table', locals: {transactions: @rejected_transactions} %>
+    </div>
+  </div>
+</div>

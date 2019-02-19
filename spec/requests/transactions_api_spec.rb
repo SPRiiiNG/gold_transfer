@@ -54,9 +54,11 @@ RSpec.describe 'Transactions API', type: :request do
       expect(data['name']).to be_present
 
       #after staff approve
-      user.transactions.where(name: data['name']).first.approve!
+      transaction = user.transactions.where(name: data['name']).first
+      transaction.approve!
       cash_balance = user.balances.where(asset_id: asset_cash.id).first
       expect(cash_balance.amount.to_f).to eq(1999)
+      expect(transaction.reload.status).to eq('completed')
     end
 
     it "should top up failured" do
@@ -92,9 +94,11 @@ RSpec.describe 'Transactions API', type: :request do
       expect(data['name']).to be_present
 
       #after staff approve
-      user.transactions.where(name: data['name']).first.approve!
+      transaction = user.transactions.where(name: data['name']).first
+      transaction.approve!
       cash_balance = user.balances.where(asset_id: asset_cash.id).first
       expect(cash_balance.amount.to_f).to eq(1)
+      expect(transaction.reload.status).to eq('completed')
     end
 
     it "should withdraw failured" do

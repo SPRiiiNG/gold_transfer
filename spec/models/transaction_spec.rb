@@ -95,6 +95,7 @@ RSpec.describe Transaction, type: :model do
         expect(transaction_top_up.transaction_transfers.first.balance).to eq(cash_balance)
         expect(transaction_top_up.transaction_transfers.first.amount).to eq(1000)
         expect(transaction_top_up.transaction_transfers.first.transfer_type).to eq('add')
+        expect(transaction_top_up.status).to eq('completed')
       end
 
       context "with asset type and approve" do
@@ -106,6 +107,7 @@ RSpec.describe Transaction, type: :model do
           expect(transaction_withdraw.transaction_transfers_by('cash').first.balance).to eq(cash_balance)
           expect(transaction_withdraw.transaction_transfers_by('cash').first.amount.to_f).to eq(500)
           expect(transaction_withdraw.transaction_transfers_by('cash').first.transfer_type).to eq('deduct')
+          expect(transaction_withdraw.status).to eq('completed')
         end
 
         it "should relate to correct balance with buy gold" do
