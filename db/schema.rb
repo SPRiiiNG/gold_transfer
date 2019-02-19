@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2019_02_18_172923) do
+ActiveRecord::Schema.define(version: 2019_02_19_085825) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -53,6 +53,11 @@ ActiveRecord::Schema.define(version: 2019_02_18_172923) do
     t.datetime "updated_at", null: false
   end
 
+  create_table "staffs", force: :cascade do |t|
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+  end
+
   create_table "transaction_transfers", force: :cascade do |t|
     t.bigint "transaction_id"
     t.bigint "balance_id"
@@ -72,6 +77,7 @@ ActiveRecord::Schema.define(version: 2019_02_18_172923) do
     t.string "asset_type"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.string "status"
     t.index ["user_id"], name: "index_transactions_on_user_id"
   end
 

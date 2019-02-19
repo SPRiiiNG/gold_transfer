@@ -13,6 +13,7 @@ RSpec.describe 'Transactions API', type: :request do
     asset_cash
     asset_gold
     transaction_top_up.save
+    transaction_top_up.approve!
   end
 
   describe "#index" do
@@ -50,6 +51,10 @@ RSpec.describe 'Transactions API', type: :request do
       data = JSON.parse(response.body)
       expect(response.status).to eq(200)
       expect(data['result']).to eq('ok')
+      expect(data['name']).to be_present
+
+      #after staff approve
+      user.transactions.where(name: data['name']).first.approve!
       cash_balance = user.balances.where(asset_id: asset_cash.id).first
       expect(cash_balance.amount.to_f).to eq(1999)
     end
@@ -84,6 +89,10 @@ RSpec.describe 'Transactions API', type: :request do
       data = JSON.parse(response.body)
       expect(response.status).to eq(200)
       expect(data['result']).to eq('ok')
+      expect(data['name']).to be_present
+
+      #after staff approve
+      user.transactions.where(name: data['name']).first.approve!
       cash_balance = user.balances.where(asset_id: asset_cash.id).first
       expect(cash_balance.amount.to_f).to eq(1)
     end
@@ -135,6 +144,7 @@ RSpec.describe 'Transactions API', type: :request do
       data = JSON.parse(response.body)
       expect(response.status).to eq(200)
       expect(data['result']).to eq('ok')
+      expect(data['name']).to be_present
       cash_balance = user.balances.where(asset_id: asset_cash.id).first
       expect(cash_balance.amount.to_f).to eq(800)
       gold_balance = user.balances.where(asset_id: asset_gold.id).first
@@ -200,6 +210,7 @@ RSpec.describe 'Transactions API', type: :request do
       data = JSON.parse(response.body)
       expect(response.status).to eq(200)
       expect(data['result']).to eq('ok')
+      expect(data['name']).to be_present
       cash_balance = user.balances.where(asset_id: asset_cash.id).first
       expect(cash_balance.amount.to_f).to eq(700)
       gold_balance = user.balances.where(asset_id: asset_gold.id).first

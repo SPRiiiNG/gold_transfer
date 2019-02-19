@@ -11,6 +11,7 @@ RSpec.describe Transaction, type: :model do
     asset_cash
     asset_gold
     transaction_top_up.save
+    transaction_top_up.approve!
   end
 
   describe "Validations" do
@@ -30,6 +31,7 @@ RSpec.describe Transaction, type: :model do
       it "should create withdraw transaction failured" do
         transaction_withdraw = FactoryBot.build(:transaction, income_amount: 1500, transaction_type: 'withdraw', user_id: user.id)
         transaction_withdraw.save
+        puts transaction_withdraw.errors.messages
         expect(transaction_withdraw.errors.messages).to be_present
         expect(transaction_withdraw.transaction_transfers_by('cash').first).to be_blank
       end
@@ -87,7 +89,7 @@ RSpec.describe Transaction, type: :model do
   end
 
   describe "Callbakcs" do
-    describe "#relate_to_balance" do
+    describe "#create_transfers" do
       it "should relate to correct balance" do        
         cash_balance = user.balances.where(asset_id: asset_cash.id).first
         expect(transaction_top_up.transaction_transfers.first.balance).to eq(cash_balance)
@@ -95,10 +97,11 @@ RSpec.describe Transaction, type: :model do
         expect(transaction_top_up.transaction_transfers.first.transfer_type).to eq('add')
       end
 
-      context "with asset type" do
+      context "with asset type and approve" do
         it "should relate to correct balance with withdraw" do
           transaction_withdraw = FactoryBot.build(:transaction, income_amount: 500, transaction_type: 'withdraw', user_id: user.id)
           transaction_withdraw.save
+          transaction_withdraw.approve!
           cash_balance = user.balances.where(asset_id: asset_cash.id).first
           expect(transaction_withdraw.transaction_transfers_by('cash').first.balance).to eq(cash_balance)
           expect(transaction_withdraw.transaction_transfers_by('cash').first.amount.to_f).to eq(500)

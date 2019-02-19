@@ -11,6 +11,7 @@ RSpec.describe Balance, type: :model do
     asset_cash
     asset_gold
     transaction_top_up.save
+    transaction_top_up.approve!
   end
 
   describe "Methods" do
@@ -24,6 +25,7 @@ RSpec.describe Balance, type: :model do
         cash_balance = user.balances.where(asset_id: asset_cash.id).first
         transaction_withdraw = FactoryBot.build(:transaction, income_amount: 500, transaction_type: 'withdraw', user_id: user.id)
         transaction_withdraw.save
+        transaction_withdraw.approve!
         expect(cash_balance.amount.to_f).to eq(500)
       end
 

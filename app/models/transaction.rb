@@ -1,6 +1,7 @@
 class Transaction < ApplicationRecord
-  scope :allowed_types, ->  { %w(buy sell top_up withdraw) }
+  include AASM
 
+  scope :allowed_types, ->  { %w(buy sell top_up withdraw) }
   attr_accessor :income_amount
 
   belongs_to :user
@@ -22,44 +23,47 @@ class Transaction < ApplicationRecord
   validate :asset_enough, :if => Proc.new { |record| record.transaction_type == 'sell'}
   
   before_validation :generate_name
-  after_save :relate_to_balance
+  after_create :create_transfers
 
-  def relate_to_balance
-    cash_balance = asset_balance(self.user)
+  aasm column: :status do
+    state :pending, :initial => true
+    state :completed
+    state :rejected
+
+    event :approve do
+      before do
+        self.relate_to_balance
+      end
+      transitions :from => :pending, :to => :completed
+    end
+
+    event :reject do
+      transitions :from => :pending, :to => :rejected
+    end
+  end
+
+  def create_transfers
     case self.transaction_type
     when 'buy'
       transfer_buy = transfer_buy(self.asset_type, income_amount)
-      asset_balance = asset_balance(self.user, self.asset_type)
-
       transaction_transfer_cash = transaction_transfer('cash', 'deduct', transfer_buy[:deduct])
-      transaction_transfer_cash.balance = cash_balance
-      transaction_transfer_cash.save
-      
+      transaction_transfer_cash.save      
       transaction_transfer_asset = transaction_transfer(self.asset_type, 'add', transfer_buy[:add])
-      transaction_transfer_asset.balance = asset_balance
       transaction_transfer_asset.save
-
+      self.approve!
     when 'sell'
-      transfer_sell = transfer_sell(self.asset_type, income_amount)
-      asset_balance = asset_balance(self.user, self.asset_type)
-      
+      transfer_sell = transfer_sell(self.asset_type, income_amount)      
       transaction_transfer_asset = transaction_transfer(self.asset_type, 'deduct', transfer_sell[:deduct])
-      transaction_transfer_asset.balance = asset_balance
       transaction_transfer_asset.save
-
       transaction_transfer_cash = transaction_transfer('cash', 'add', transfer_sell[:add])
-      transaction_transfer_cash.balance = cash_balance
       transaction_transfer_cash.save
-
+      self.approve!
     when 'top_up'
       cash_amount = currency_to_cash(income_amount)
       transaction_transfer_cash = transaction_transfer('cash', 'add', cash_amount)
-      transaction_transfer_cash.balance = cash_balance
       transaction_transfer_cash.save
-
     when 'withdraw'
       transaction_transfer_cash = transaction_transfer('cash', 'deduct', income_amount)
-      transaction_transfer_cash.balance = cash_balance
       transaction_transfer_cash.save
     end
   end
@@ -110,7 +114,16 @@ class Transaction < ApplicationRecord
     end
   end
 
-  private
+  def relate_to_balance
+    self.transaction_transfers.each do |transfer|
+      balance = asset_balance(self.user, transfer.asset_type)
+      transfer.balance = balance
+      transfer.save
+    end
+  end
+
+  private 
+
   def asset_type_inclusion
     allowed_asset_types = Transaction.allowed_asset_types
     unless allowed_asset_types.include? self.asset_type

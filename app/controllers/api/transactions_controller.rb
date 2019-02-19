@@ -8,7 +8,7 @@ module Api
     def top_up
       transaction = initial_transaction(cash_params[:amount], 'top_up', 'cash')
       if transaction.save
-        render json: { result: 'ok' }
+        render json: { result: 'ok', name: transaction.name }
       else
         render json: { message: transaction.errors.full_messages.join(',')}, status: 400
       end
@@ -17,7 +17,7 @@ module Api
     def withdraw
       transaction = initial_transaction(cash_params[:amount], 'withdraw', 'cash')
       if transaction.save
-        render json: { result: 'ok' }
+        render json: { result: 'ok', name: transaction.name }
       else
         render json: { message: transaction.errors.full_messages.join(',')}, status: 400
       end
@@ -26,7 +26,7 @@ module Api
     def buy
       transaction = initial_transaction(asset_params[:amount], 'buy', asset_params[:asset])
       if transaction.save
-        render json: { result: 'ok' }
+        render json: { result: 'ok', name: transaction.name }
       else
         render json: { message: transaction.errors.full_messages.join(',')}, status: 400
       end
@@ -35,7 +35,7 @@ module Api
     def sell
       transaction = initial_transaction(asset_params[:amount], 'sell', asset_params[:asset])
       if transaction.save
-        render json: { result: 'ok' }
+        render json: { result: 'ok', name: transaction.name }
       else
         render json: { message: transaction.errors.full_messages.join(',')}, status: 400
       end

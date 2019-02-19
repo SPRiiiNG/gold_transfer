@@ -41,6 +41,7 @@ gem 'devise'
 gem 'tiddle'
 gem 'faker', :git => 'https://github.com/stympy/faker.git', :branch => 'master'
 gem 'awesome_print', '1.8.0', require: 'ap'
+gem 'aasm', '5.0.0'
 
 group :development, :test do
   # Call 'byebug' anywhere in the code to stop execution and get a debugger console
