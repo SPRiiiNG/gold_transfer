@@ -13,6 +13,7 @@ RSpec.describe 'Balances API', type: :request do
     asset_cash
     asset_gold
     transaction_top_up.save
+    transaction_top_up.approve!
   end
 
   describe "#show" do
