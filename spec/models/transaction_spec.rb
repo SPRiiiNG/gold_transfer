@@ -31,7 +31,6 @@ RSpec.describe Transaction, type: :model do
       it "should create withdraw transaction failured" do
         transaction_withdraw = FactoryBot.build(:transaction, income_amount: 1500, transaction_type: 'withdraw', user_id: user.id)
         transaction_withdraw.save
-        puts transaction_withdraw.errors.messages
         expect(transaction_withdraw.errors.messages).to be_present
         expect(transaction_withdraw.transaction_transfers_by('cash').first).to be_blank
       end
@@ -123,6 +122,7 @@ RSpec.describe Transaction, type: :model do
           expect(transaction_buy.transaction_transfers_by('gold').first.balance).to eq(gold_balance)
           expect(transaction_buy.transaction_transfers_by('gold').first.amount.to_f).to eq(50)
           expect(transaction_buy.transaction_transfers_by('gold').first.transfer_type).to eq('add')
+          expect(transaction_buy.status).to eq('completed')
         end
 
         it "should relate to correct balance with sell gold" do
@@ -140,6 +140,7 @@ RSpec.describe Transaction, type: :model do
           expect(transaction_sell.transaction_transfers_by('gold').first.balance).to eq(gold_balance)
           expect(transaction_sell.transaction_transfers_by('gold').first.amount.to_f).to eq(50)
           expect(transaction_sell.transaction_transfers_by('gold').first.transfer_type).to eq('deduct')
+          expect(transaction_sell.status).to eq('completed')
         end
       end
     end
