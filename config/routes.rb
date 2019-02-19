@@ -1,7 +1,14 @@
 Rails.application.routes.draw do
 
-  namespace :api, :defaults => {:format => :json} do
+  devise_for :staffs
 
+  devise_scope :staff do
+    root to: "staffs/sessions#new"
+  end
+  
+  get 'welcome', to: "home#welcome"
+
+  namespace :api, :defaults => {:format => :json} do
     post 'register', to: 'users#create'
     get 'transactions', to: 'transactions#index'
     post 'transactions/top_up', to: 'transactions#top_up'
@@ -14,5 +21,4 @@ Rails.application.routes.draw do
       sessions: 'users/sessions'
     }
   end
-  # For details on the DSL available within this file, see http://guides.rubyonrails.org/routing.html
 end

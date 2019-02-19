@@ -1,0 +1,31 @@
+<div class="col-md-2">
+  <h3 style="margin-top: 0px">เข้าสู่ระบบ</h3>
+  <%= form_for(resource, as: resource_name, url: session_path(resource_name)) do |f| %>
+    <div class="field">
+      <%= f.label :email, class: 'control-label' %><br />
+      <%= f.email_field :email, autofocus: true, class: 'form-control input-sm' %>
+    </div>
+    <!-- <br /> -->
+    <div class="field">
+      <%= f.label :password, class: 'control-label'%><br />
+      <%= f.password_field :password, autocomplete: "off", class: 'form-control input-sm'%>
+    </div>
+    <br />
+    <% if devise_mapping.rememberable? -%>
+      <div class="field" style="margin-bottom: 10px">
+        <%= f.check_box :remember_me %>
+        <%= f.label :remember_me %>
+      </div>
+    <% end -%>
+
+    <div class="actions">
+      <%= f.submit "Sign in", class: 'btn btn-warning'%>
+    </div>
+
+    <%= hidden_field_tag "start_time", @start_time if @start_time.present?%>
+    <%= hidden_field_tag "end_time", @end_time if @end_time.present?%>
+  <% end %>
+  <br />
+  <br />
+
+</div>

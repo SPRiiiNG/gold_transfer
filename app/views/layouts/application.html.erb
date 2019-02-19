@@ -10,6 +10,11 @@
   </head>
 
   <body>
-    <%= yield %>
+    <div class="container-fluid ">
+      <div id="system-flashes">
+        <%= render partial: "shared/flashes" %>
+      </div>
+      <%= yield %>
+    </div>
   </body>
 </html>
