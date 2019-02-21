@@ -20,6 +20,32 @@ RSpec.describe Transaction, type: :model do
     it { is_expected.to validate_presence_of(:income_amount) }
     it { is_expected.to validate_numericality_of(:income_amount) }
 
+    context "transaction_type: inclusion of allowed_types" do
+      it "should valid" do
+        transaction_top_up.transaction_type = 'top_up'
+        expect(transaction_top_up.valid?).to eq(true)
+      end
+
+      it "should not valid" do
+        transaction_top_up.transaction_type = 'borrow'
+        expect(transaction_top_up.valid?).to eq(false)
+        expect(transaction_top_up.errors.messages[:transaction_type]).to eq(["is not included in the list"])
+      end
+    end
+
+    describe "#asset_type_inclusion" do
+      it "should valid" do
+        transaction_top_up.asset_type = asset_cash.name
+        expect(transaction_top_up.valid?).to eq(true)
+      end
+
+      it "should not valid" do
+        transaction_top_up.asset_type = 'vibranium'
+        expect(transaction_top_up.valid?).to eq(false)
+        expect(transaction_top_up.errors.messages[:asset_type].first).to match(/asset type not in/)
+      end
+    end
+
     describe "#cash_enough" do
       it "should create withdraw transaction successfully" do
         transaction_withdraw = FactoryBot.build(:transaction, income_amount: 500, transaction_type: 'withdraw', user_id: user.id)
