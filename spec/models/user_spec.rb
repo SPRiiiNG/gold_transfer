@@ -6,6 +6,14 @@ RSpec.describe User, type: :model do
   let(:asset_gold) { FactoryBot.create(:asset, name: 'gold') }
   let(:user) { FactoryBot.create(:user, region: currency) }
 
+  describe "Associations" do
+    it { should have_many(:authentication_tokens).dependent(:destroy) }
+    it { should have_many(:transactions) }
+    it { should have_many(:balances) }
+    it { should belong_to(:region).class_name('Currency') }
+    it { should have_db_column(:currency_id) }
+  end
+
   describe "Callbacks" do
     describe "#generate_balance_by_assets" do
       it "should generate balance by assets" do

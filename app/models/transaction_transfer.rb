@@ -2,7 +2,7 @@ class TransactionTransfer < ApplicationRecord
   scope :allowed_transfer_type, -> { %w(add deduct) }
 
   belongs_to :transaction_parent, foreign_key: "transaction_id", class_name: "Transaction"
-  belongs_to :balance, required: false
+  belongs_to :balance, optional: true
 
   validates :asset_type,
     presence: true,

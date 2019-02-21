@@ -101,6 +101,12 @@ RSpec.describe Transaction, type: :model do
     end
   end
 
+  describe "Associations" do
+    it { should have_many(:transaction_transfers) }
+    it { should belong_to(:user) }
+    it { should have_db_column(:user_id) }
+  end
+
   describe "Methods" do
     describe "#asset_balance" do
       it "should return balance from new asset correctly" do

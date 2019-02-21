@@ -91,7 +91,7 @@ class Transaction < ApplicationRecord
   end
 
   def currency_to_cash(income_amount)
-    currency = self.user.region.top_up_rate
+    currency = self.user.region&.top_up_rate || 0
     income_amount * currency
   end
 

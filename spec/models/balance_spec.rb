@@ -14,6 +14,12 @@ RSpec.describe Balance, type: :model do
     transaction_top_up.approve!
   end
 
+  describe "Associations" do
+    it { should belong_to(:asset) }
+    it { should belong_to(:user) }
+    it { should have_many(:transaction_transfers) }
+  end
+
   describe "Methods" do
     describe "#amount" do
       it "return amount correctly after top up" do

@@ -1,6 +1,7 @@
 require 'rails_helper'
 
 RSpec.describe TransactionTransfer, type: :model do
+
   describe "Validations" do
     let(:currency) { FactoryBot.create(:currency) }
     let(:user) { FactoryBot.create(:user, region: currency) }
@@ -44,5 +45,12 @@ RSpec.describe TransactionTransfer, type: :model do
         expect(transaction_transfer.errors.messages[:transfer_type]).to eq(["is not included in the list"])
       end
     end
+  end
+
+  describe "Associations" do
+    it { should belong_to(:transaction_parent).class_name('Transaction') }
+    it { should have_db_column(:transaction_id) }
+    it { should belong_to(:balance).optional }
+    it { should have_db_column(:balance_id) }
   end
 end

@@ -5,7 +5,7 @@ class User < ApplicationRecord
          :recoverable, :rememberable, :validatable,
          :trackable, :token_authenticatable
 
-  has_many :authentication_tokens
+  has_many :authentication_tokens, dependent: :destroy
   has_many :transactions
   has_many :balances, dependent: :destroy
   belongs_to :region, foreign_key: "currency_id", class_name: "Currency"
