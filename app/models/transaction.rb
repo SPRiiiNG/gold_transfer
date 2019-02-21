@@ -77,22 +77,24 @@ class Transaction < ApplicationRecord
   end
 
   def transfer_buy(asset_type, asset_amount)
+    deduct = asset_type.eql?('cash') ? asset_amount.to_f : asset_amount.to_f * 10
     {
       add: asset_amount.to_f,
-      deduct: asset_amount.to_f * 10
+      deduct: deduct
     }
   end
 
   def transfer_sell(asset_type, asset_amount)
+    add = asset_type.eql?('cash') ? asset_amount.to_f : asset_amount.to_f * 10
     {
-      add: asset_amount.to_f * 10,
+      add: add,
       deduct: asset_amount.to_f
     }
   end
 
   def currency_to_cash(income_amount)
-    currency = self.user.region&.top_up_rate || 0
-    income_amount * currency
+    currency_rate = self.user.region.reload&.top_up_rate
+    income_amount * currency_rate
   end
 
   def transaction_transfers_by(asset_type)

@@ -117,6 +117,40 @@ RSpec.describe Transaction, type: :model do
         expect(asset_balance.asset_id).to eq(asset_silver.id)
       end
     end
+
+    describe "#transfer_buy" do
+      it "should return correct hash" do
+        transaction_buy = FactoryBot.build(:transaction, income_amount: 20, transaction_type: 'buy', asset_type: 'gold', user_id: user.id)
+        hash = transaction_buy.transfer_buy('gold', 20)
+        expect(hash[:add]).to eq(20)
+        expect(hash[:deduct]).to eq(200)
+
+        hash = transaction_buy.transfer_buy('cash', 20)
+        expect(hash[:add]).to eq(20)
+        expect(hash[:deduct]).to eq(20)
+      end
+    end
+
+    describe "#transfer_sell" do
+      it "should return correct hash" do
+        transaction_sell = FactoryBot.build(:transaction, income_amount: 20, transaction_type: 'sell', asset_type: 'gold', user_id: user.id)
+        hash = transaction_sell.transfer_sell('gold', 20)
+        expect(hash[:add]).to eq(200)
+        expect(hash[:deduct]).to eq(20)
+
+        hash = transaction_sell.transfer_buy('cash', 20)
+        expect(hash[:add]).to eq(20)
+        expect(hash[:deduct]).to eq(20)
+      end
+    end
+
+    describe "#currency_to_cash" do
+      it "should return correct cash" do
+        currency.top_up_rate = 10
+        currency.save
+        expect(transaction_top_up.currency_to_cash(100).to_f).to eq(100*10)
+      end
+    end
   end
 
   describe "Callbakcs" do
