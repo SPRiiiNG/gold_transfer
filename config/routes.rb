@@ -1,5 +1,6 @@
-Rails.application.routes.draw do
+require 'sidekiq/web'
 
+Rails.application.routes.draw do
   devise_for :staffs
 
   devise_scope :staff do
@@ -28,4 +29,6 @@ Rails.application.routes.draw do
       sessions: 'users/sessions'
     }
   end
+
+  mount Sidekiq::Web => '/sidekiq'
 end

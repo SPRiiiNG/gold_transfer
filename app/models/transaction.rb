@@ -45,29 +45,7 @@ class Transaction < ApplicationRecord
   end
 
   def create_transfers
-    case self.transaction_type
-    when 'buy'
-      transfer_buy = transfer_buy(self.asset_type, income_amount)
-      transaction_transfer_cash = transaction_transfer('cash', 'deduct', transfer_buy[:deduct])
-      transaction_transfer_cash.save      
-      transaction_transfer_asset = transaction_transfer(self.asset_type, 'add', transfer_buy[:add])
-      transaction_transfer_asset.save
-      self.approve!
-    when 'sell'
-      transfer_sell = transfer_sell(self.asset_type, income_amount)      
-      transaction_transfer_asset = transaction_transfer(self.asset_type, 'deduct', transfer_sell[:deduct])
-      transaction_transfer_asset.save
-      transaction_transfer_cash = transaction_transfer('cash', 'add', transfer_sell[:add])
-      transaction_transfer_cash.save
-      self.approve!
-    when 'top_up'
-      cash_amount = currency_to_cash(income_amount)
-      transaction_transfer_cash = transaction_transfer('cash', 'add', cash_amount)
-      transaction_transfer_cash.save
-    when 'withdraw'
-      transaction_transfer_cash = transaction_transfer('cash', 'deduct', income_amount)
-      transaction_transfer_cash.save
-    end
+    TransactionTransferWorker.perform_async(self.id, self.income_amount)
   end
 
   def asset_balance(user, asset_type='cash')
@@ -126,6 +104,15 @@ class Transaction < ApplicationRecord
     end
   end
 
+  def transaction_transfer(asset_type, transfer_type, amount)
+    TransactionTransfer.new(
+      transaction_parent: self,
+      asset_type: asset_type, 
+      transfer_type: transfer_type,
+      amount: amount
+    )
+  end
+
   private 
 
   def asset_type_inclusion
@@ -148,15 +135,6 @@ class Transaction < ApplicationRecord
     if self.income_amount.to_f > asset_balance.amount
       errors.add("balance", "#{self.asset_type} not enough, #{self.asset_type} total: #{self.income_amount}, #{self.asset_type} amount: #{asset_balance.amount}")
     end
-  end
-
-  def transaction_transfer(asset_type, transfer_type, amount)
-    TransactionTransfer.new(
-      transaction_parent: self,
-      asset_type: asset_type, 
-      transfer_type: transfer_type,
-      amount: amount
-    )
   end
 
   def generate_name

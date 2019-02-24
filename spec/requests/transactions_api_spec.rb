@@ -2,6 +2,7 @@ require 'rails_helper'
 require 'fake_request'
 
 RSpec.describe 'Transactions API', type: :request do
+  let(:job)     { TransactionTransferWorker.new }
   let(:currency) { FactoryBot.create(:currency) }
   let(:user)      { FactoryBot.create(:user, region: currency) }
   let(:asset_cash) { FactoryBot.create(:asset, name: 'cash') }
@@ -13,7 +14,8 @@ RSpec.describe 'Transactions API', type: :request do
     asset_cash
     asset_gold
     transaction_top_up.save
-    transaction_top_up.approve!
+    job.perform(transaction_top_up.id, transaction_top_up.income_amount)
+    transaction_top_up.reload.approve!
   end
 
   describe "#index" do
@@ -53,9 +55,13 @@ RSpec.describe 'Transactions API', type: :request do
       expect(data['result']).to eq('ok')
       expect(data['name']).to be_present
 
-      #after staff approve
       transaction = user.transactions.where(name: data['name']).first
-      transaction.approve!
+
+      #after callbacks
+      job.perform(transaction.id, 999)
+
+      #after staff approve      
+      transaction.reload.approve!
       cash_balance = user.balances.where(asset_id: asset_cash.id).first
       expect(cash_balance.amount.to_f).to eq(1999)
       expect(transaction.reload.status).to eq('completed')
@@ -93,8 +99,10 @@ RSpec.describe 'Transactions API', type: :request do
       expect(data['result']).to eq('ok')
       expect(data['name']).to be_present
 
-      #after staff approve
       transaction = user.transactions.where(name: data['name']).first
+      #after callbacks
+      job.perform(transaction.id, 999)
+      #after staff approve
       transaction.approve!
       cash_balance = user.balances.where(asset_id: asset_cash.id).first
       expect(cash_balance.amount.to_f).to eq(1)
@@ -149,6 +157,11 @@ RSpec.describe 'Transactions API', type: :request do
       expect(response.status).to eq(200)
       expect(data['result']).to eq('ok')
       expect(data['name']).to be_present
+
+      transaction = user.transactions.where(name: data['name']).first
+      #after callbacks
+      job.perform(transaction.id, 20)
+
       cash_balance = user.balances.where(asset_id: asset_cash.id).first
       expect(cash_balance.amount.to_f).to eq(800)
       gold_balance = user.balances.where(asset_id: asset_gold.id).first
@@ -199,6 +212,7 @@ RSpec.describe 'Transactions API', type: :request do
 
     before do
       transaction_buy.save
+      job.perform(transaction_buy.id, transaction_buy.income_amount)
     end
 
     it "should sell successfully" do
@@ -215,6 +229,10 @@ RSpec.describe 'Transactions API', type: :request do
       expect(response.status).to eq(200)
       expect(data['result']).to eq('ok')
       expect(data['name']).to be_present
+      transaction = user.transactions.where(name: data['name']).first
+      #after callbacks
+      job.perform(transaction.id, 20)
+      
       cash_balance = user.balances.where(asset_id: asset_cash.id).first
       expect(cash_balance.amount.to_f).to eq(700)
       gold_balance = user.balances.where(asset_id: asset_gold.id).first

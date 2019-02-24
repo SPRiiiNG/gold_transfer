@@ -2,6 +2,7 @@ require 'rails_helper'
 require 'fake_request'
 
 RSpec.describe 'Balances API', type: :request do
+  let(:job)     { TransactionTransferWorker.new }
   let(:currency) { FactoryBot.create(:currency) }
   let(:user)      { FactoryBot.create(:user, region: currency) }
   let(:asset_cash) { FactoryBot.create(:asset, name: 'cash') }
@@ -13,7 +14,8 @@ RSpec.describe 'Balances API', type: :request do
     asset_cash
     asset_gold
     transaction_top_up.save
-    transaction_top_up.approve!
+    job.perform(transaction_top_up.id, transaction_top_up.income_amount)
+    transaction_top_up.reload.approve!
   end
 
   describe "#show" do
@@ -32,6 +34,7 @@ RSpec.describe 'Balances API', type: :request do
     it "return balances correctly" do
       transaction_buy = FactoryBot.build(:transaction, income_amount: 50, transaction_type: 'buy', asset_type: 'gold', user_id: user.id)
       transaction_buy.save
+      job.perform(transaction_buy.id, 50)
       get api_balance_path,
       headers: {
         "X-USER-EMAIL" => user.email,

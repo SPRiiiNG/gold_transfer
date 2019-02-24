@@ -1,0 +1,5 @@
+# :verbose: false
+# :concurrency: 25
+# :logfile: ./log/sidekiq.log
+# :queues:
+#   - transaction_transfer

@@ -18,7 +18,7 @@
         <td><%= transaction.user.email %></td>
         <td><%= transaction.transaction_type %></td>
         <td><%= transaction.asset_type %></td>
-        <td><%= transaction.transaction_transfers_by('cash').first.amount %></td>
+        <td><%= transaction.transaction_transfers_by('cash').first&.amount %></td>
         <td>
           <%= link_to 'Approve', approve_transaction_path(transaction), method: :put, data: { confirm: 'Are you sure?' }, class: 'btn-sm btn-info' %>
           <%= link_to 'Reject', reject_transaction_path(transaction), method: :put, data: { confirm: 'Are you sure?' }, class: 'btn-sm btn-danger' %>

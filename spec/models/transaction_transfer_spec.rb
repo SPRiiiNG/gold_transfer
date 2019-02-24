@@ -3,6 +3,7 @@ require 'rails_helper'
 RSpec.describe TransactionTransfer, type: :model do
 
   describe "Validations" do
+    let(:job)     { TransactionTransferWorker.new }
     let(:currency) { FactoryBot.create(:currency) }
     let(:user) { FactoryBot.create(:user, region: currency) }
     let(:asset_cash) { FactoryBot.create(:asset, name: 'cash') }
@@ -12,6 +13,7 @@ RSpec.describe TransactionTransfer, type: :model do
     before do
       asset_cash
       transaction_top_up.save
+      job.perform(transaction_top_up.id, transaction_top_up.income_amount)
     end
 
     it { is_expected.to validate_presence_of(:asset_type) }
